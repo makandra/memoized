@@ -14,7 +14,16 @@ module Memoizer
 
   module ClassMethods
     def memoize(*method_names)
+      @memoizer_memoized_methods ||= []
+
       method_names.each do |method_name|
+        # If the method is already memoized, don't do anything
+        if @memoizer_memoized_methods.include?(method_name)
+          next
+        else
+          @memoizer_memoized_methods << method_name
+        end
+
         memoized_ivar_name = Memoizer.ivar_name(method_name)
         unmemoized_method = "_unmemoized_#{method_name}"
 

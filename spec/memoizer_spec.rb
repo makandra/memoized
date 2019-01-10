@@ -6,7 +6,9 @@ class MemoizerSpecClass
   def no_params() Date.today; end
   def with_params?(ndays, an_array) Date.today + ndays + an_array.length; end
   def returning_nil!() Date.today; nil; end
-  memoize :no_params, :with_params?, :returning_nil!
+  def double_memoized() Date.today; end
+  memoize :no_params, :with_params?, :returning_nil!, :double_memoized
+  memoize :double_memoized
 end
 class Beepbop < MemoizerSpecClass; end
 
@@ -24,6 +26,15 @@ describe Memoizer do
         expect(object.no_params).to eq(today)
         Timecop.freeze(tomorrow)
         expect(object.no_params).to eq(today)
+      end
+    end
+
+    context "for a double-memoized method" do
+      it "works the same as a calling memoize once" do
+        Timecop.freeze(today)
+        expect(object.double_memoized).to eq(today)
+        Timecop.freeze(tomorrow)
+        expect(object.double_memoized).to eq(today)
       end
     end
 
