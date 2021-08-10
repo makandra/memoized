@@ -76,6 +76,48 @@ instance.goodbye        # the goodbye method is now memoized
 instance.unmemoize_all  # neither hello nor goodbye are memoized anymore
 ```
 
+## Limitations
+
+When you are using Memoized with default arguments or default keyword arguments, there are some edge cased you have to
+keep in mind.
+
+When you memoize a method with (keyword) arguments that have an expression as default value, you should be aware
+that the expression is evaluated only once.
+
+```ruby
+memoize def print_time(time = Time.now)
+  time
+end
+
+print_time
+=> 2021-07-23 14:23:18 +0200
+
+sleep(1.minute)
+print_time
+=> 2021-07-23 14:23:18 +0200
+```
+
+When you memoize a method with (keyword) arguments that have default values, you should be aware that Memoized
+differentiates between a method call without arguments and the default values.
+
+```ruby
+def true_or_false(default = true)
+  puts 'calculate value ...'
+  default
+end
+
+true_or_false
+calculate value ...
+=> true
+
+true_or_false
+=> true
+
+true_or_false(true)
+calculate value ...
+=> true
+```
+
 ## Development
 
 There are tests in `spec`. We only accept PRs with tests. To run tests:
