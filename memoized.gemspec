@@ -8,6 +8,7 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/makandra/memoized"
   s.summary     = "Memoized caches the results of your method calls"
   s.description = s.summary
+  s.metadata    = { 'rubygems_mfa_required' => 'true' }
 
   s.files         = `git ls-files`.split("\n").reject { |path| File.lstat(path).symlink? }
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").reject { |path| File.lstat(path).symlink? }
