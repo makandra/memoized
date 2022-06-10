@@ -22,62 +22,31 @@ module Memoized
 
         alias_method unmemoized_method, method_name
 
-        arity = instance_method(unmemoized_method).arity
+        parameters = Parameters.new(instance_method(unmemoized_method).parameters)
 
-        if arity == 0
-          module_eval(<<-RUBY)
-            def #{method_name}()
-              #{memoized_ivar_name} ||= [#{unmemoized_method}()]
-              #{memoized_ivar_name}.first
-            end
-          RUBY
+        module_eval(<<-RUBY)
+          def #{method_name}(#{parameters.signature})
+            all_args = []
+            all_kwargs = {}
 
-        elsif arity == -1
-          module_eval(<<-RUBY)
-            def #{method_name}(*args)
-              #{memoized_ivar_name} ||= {}
-              if #{memoized_ivar_name}.has_key?(args)
-                #{memoized_ivar_name}[args]
-              else
-                #{memoized_ivar_name}[args] = #{unmemoized_method}(*args)
+            #{parameters.cache_key}
+
+            cache_key = [all_args, all_kwargs]
+            #{memoized_ivar_name} ||= {}
+            
+            if #{memoized_ivar_name}.key?(cache_key)
+              #{memoized_ivar_name}[cache_key]
+            else
+              live_result = if all_kwargs.empty?
+                #{unmemoized_method}(*all_args)
+              else  
+                #{unmemoized_method}(*all_args, **all_kwargs)
               end
+              #{memoized_ivar_name}[cache_key] = live_result
+              live_result
             end
-          RUBY
-
-        elsif arity < -1
-          # For Ruby methods that take a variable number of arguments,
-          # Method#arity returns -n-1, where n is the number of required arguments
-          required_arg_names = (1..(-arity - 1)).map { |i| "arg#{i}" }
-          required_args_ruby = required_arg_names.join(', ')
-
-          module_eval(<<-RUBY)
-            def #{method_name}(#{required_args_ruby}, *optional_args)
-              all_args = [#{required_args_ruby}, *optional_args]
-              #{memoized_ivar_name} ||= {}
-              if #{memoized_ivar_name}.has_key?(all_args)
-                #{memoized_ivar_name}[all_args]
-              else
-                #{memoized_ivar_name}[all_args] = #{unmemoized_method}(*all_args)
-              end
-            end
-          RUBY
-
-        else # positive arity
-          arg_names = (1..arity).map { |i| "arg#{i}" }
-          args_ruby = arg_names.join(', ')
-
-          module_eval(<<-RUBY)
-            def #{method_name}(#{args_ruby})
-              all_args = [#{args_ruby}]
-              #{memoized_ivar_name} ||= {}
-              if #{memoized_ivar_name}.has_key?(all_args)
-                #{memoized_ivar_name}[all_args]
-              else
-                #{memoized_ivar_name}[all_args] = #{unmemoized_method}(#{args_ruby})
-              end
-            end
-          RUBY
-        end
+          end
+        RUBY
 
         if self.private_method_defined?(unmemoized_method)
           private method_name

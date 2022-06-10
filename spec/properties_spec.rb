@@ -17,7 +17,17 @@ describe "#memoize" do
       )
     ) do |parameters|
       # params now have proper names (no :"", no Ruby keywords) due to the .map in the generator above
-      mp = Memoized::Parameters.new(parameters.uniq(&:second))
+      # mp = Memoized::Parameters.new(parameters.uniq(&:second))
+      unique_names = parameters.uniq { |v| v[1] }
+      single_args_and_kwargs = unique_names.uniq do |v|
+        if [:rest, :keyrest].include?(v[0])
+          v[0]
+        else
+          v[1]
+        end
+      end
+
+      mp = Memoized::Parameters.new(single_args_and_kwargs)
 
       eval(<<-RUBY)
         class MemoizedPropertyClass
@@ -30,6 +40,10 @@ describe "#memoize" do
           @old_parameters = new.method(:parameter_dummy).parameters
           memoize :parameter_dummy
           @new_parameters = new.method(:parameter_dummy).parameters
+
+          # cleanup to get rid of warnings
+          remove_method :_unmemoized_parameter_dummy
+          remove_method :parameter_dummy
         end
       RUBY
 
