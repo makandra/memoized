@@ -1,3 +1,5 @@
+require 'memoized/parameters'
+
 module Memoized
   def self.included(base)
     base.extend ClassMethods
