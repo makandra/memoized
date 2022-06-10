@@ -47,13 +47,13 @@ module Memoized
       when :req
         "#{param_name}"
       when :opt
-        "#{param_name} = 42"
+        "#{param_name} = Memoized::UNIQUE"
       when :rest
         "*#{param_name}"
       when :keyreq
         "#{param_name}:"
       when :key
-        "#{param_name}: 42"
+        "#{param_name}: Memoized::UNIQUE"
       when :keyrest
         "**#{param_name}"
       else raise "unknown parameter type"
@@ -69,13 +69,13 @@ module Memoized
       when :req
         "all_args.push(#{param_name})"
       when :opt
-        "all_args.push(#{param_name}) unless #{param_name}.equal?(42)"
+        "all_args.push(#{param_name}) unless #{param_name}.equal?(Memoized::UNIQUE)"
       when :rest
         "all_args.push(*#{param_name})"
       when :keyreq
         "all_kwargs[:#{param_name}] = #{param_name}"
       when :key
-        "all_kwargs[:#{param_name}] = #{param_name} unless #{param_name}.equal?(42)"
+        "all_kwargs[:#{param_name}] = #{param_name} unless #{param_name}.equal?(Memoized::UNIQUE)"
       when :keyrest
         "all_kwargs.merge!(#{param_name})"
       else raise "unknown parameter type"

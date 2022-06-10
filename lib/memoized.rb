@@ -1,6 +1,8 @@
 require 'memoized/parameters'
 
 module Memoized
+  UNIQUE = 42.freeze
+
   def self.included(base)
     base.extend ClassMethods
     base.send :include, InstanceMethods
