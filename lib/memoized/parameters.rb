@@ -62,7 +62,14 @@ module Memoized
     end
 
     def cache_key
-      params.map(&Parameters.method(:to_cache_key)).join("\n")
+      <<-STRING
+        all_args = []
+        all_kwargs = {}
+
+        #{params.map(&Parameters.method(:to_cache_key)).join("\n")}
+        
+        cache_key = [all_args, all_kwargs]
+      STRING
     end
 
     def self.to_cache_key((param_type, param_name))

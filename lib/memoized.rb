@@ -28,12 +28,8 @@ module Memoized
 
         module_eval(<<-RUBY)
           def #{method_name}(#{parameters.signature})
-            all_args = []
-            all_kwargs = {}
-
             #{parameters.cache_key}
 
-            cache_key = [all_args, all_kwargs]
             #{memoized_ivar_name} ||= {}
             
             if #{memoized_ivar_name}.key?(cache_key)
