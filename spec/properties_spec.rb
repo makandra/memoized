@@ -1,36 +1,37 @@
-describe "#memoize" do
-  include PropCheck
-  include PropCheck::Generators
-  include Memoized
+unless RUBY_VERSION == '2.5.3'
+  describe "#memoize" do
+    include PropCheck
+    include PropCheck::Generators
+    include Memoized
 
-  it "does not change the method's arity" do
-    pending("prop_check fails to load for Ruby 2.5.3") if RUBY_VERSION == '2.5.3'
+    it "does not change the method's arity" do
+      pending("prop_check fails to load for Ruby 2.5.3") if RUBY_VERSION == '2.5.3'
 
-    forall(
-      array(
-        tuple(
-          one_of(
-            constant(:req), constant(:opt), constant(:rest), constant(:keyreq), constant(:key), constant(:keyrest)
-          ),
-          simple_symbol.map do |sym|
-            "param_#{sym}".to_sym
-          end
+      forall(
+        array(
+          tuple(
+            one_of(
+              constant(:req), constant(:opt), constant(:rest), constant(:keyreq), constant(:key), constant(:keyrest)
+            ),
+            simple_symbol.map do |sym|
+              "param_#{sym}".to_sym
+            end
+          )
         )
-      )
-    ) do |parameters|
-      # params now have proper names (no :"", no Ruby keywords) due to the .map in the generator above
-      unique_names = parameters.uniq { |v| v[1] }
-      single_args_and_kwargs = unique_names.uniq do |v|
-        if [:rest, :keyrest].include?(v[0])
-          v[0]
-        else
-          v[1]
+      ) do |parameters|
+        # params now have proper names (no :"", no Ruby keywords) due to the .map in the generator above
+        unique_names = parameters.uniq { |v| v[1] }
+        single_args_and_kwargs = unique_names.uniq do |v|
+          if [:rest, :keyrest].include?(v[0])
+            v[0]
+          else
+            v[1]
+          end
         end
-      end
 
-      mp = Memoized::Parameters.new(single_args_and_kwargs)
+        mp = Memoized::Parameters.new(single_args_and_kwargs)
 
-      eval(<<-RUBY)
+        eval(<<-RUBY)
         class MemoizedPropertyClass
           include Memoized
 
@@ -46,41 +47,41 @@ describe "#memoize" do
           remove_method :_unmemoized_parameter_dummy
           remove_method :parameter_dummy
         end
-      RUBY
+        RUBY
 
-      expect(MemoizedPropertyClass.instance_variable_get(:@new_arity))
-        .to eq(MemoizedPropertyClass.instance_variable_get(:@old_arity))
-    end
-  end
-
-  it "does not change the method's parameters" do
-    pending("prop_check fails to load for Ruby 2.5.3") if RUBY_VERSION == '2.5.3'
-
-    forall(
-      array(
-        tuple(
-          one_of(
-            constant(:req), constant(:opt), constant(:rest), constant(:keyreq), constant(:key), constant(:keyrest)
-          ),
-          simple_symbol.map do |sym|
-            "param_#{sym}".to_sym
-          end
-        )
-      )
-    ) do |parameters|
-      # params now have proper names (no :"", no Ruby keywords) due to the .map in the generator above
-      unique_names = parameters.uniq { |v| v[1] }
-      single_args_and_kwargs = unique_names.uniq do |v|
-        if [:rest, :keyrest].include?(v[0])
-          v[0]
-        else
-          v[1]
-        end
+        expect(MemoizedPropertyClass.instance_variable_get(:@new_arity))
+          .to eq(MemoizedPropertyClass.instance_variable_get(:@old_arity))
       end
+    end
 
-      mp = Memoized::Parameters.new(single_args_and_kwargs)
+    it "does not change the method's parameters" do
+      pending("prop_check fails to load for Ruby 2.5.3") if RUBY_VERSION == '2.5.3'
 
-      eval(<<-RUBY)
+      forall(
+        array(
+          tuple(
+            one_of(
+              constant(:req), constant(:opt), constant(:rest), constant(:keyreq), constant(:key), constant(:keyrest)
+            ),
+            simple_symbol.map do |sym|
+              "param_#{sym}".to_sym
+            end
+          )
+        )
+      ) do |parameters|
+        # params now have proper names (no :"", no Ruby keywords) due to the .map in the generator above
+        unique_names = parameters.uniq { |v| v[1] }
+        single_args_and_kwargs = unique_names.uniq do |v|
+          if [:rest, :keyrest].include?(v[0])
+            v[0]
+          else
+            v[1]
+          end
+        end
+
+        mp = Memoized::Parameters.new(single_args_and_kwargs)
+
+        eval(<<-RUBY)
         class MemoizedPropertyClass
           include Memoized
 
@@ -96,41 +97,41 @@ describe "#memoize" do
           remove_method :_unmemoized_parameter_dummy
           remove_method :parameter_dummy
         end
-      RUBY
+        RUBY
 
-      expect(MemoizedPropertyClass.instance_variable_get(:@new_parameters))
-        .to eq(MemoizedPropertyClass.instance_variable_get(:@old_parameters))
-    end
-  end
-
-  it "does not change the method's value" do
-    pending("prop_check fails to load for Ruby 2.5.3") if RUBY_VERSION == '2.5.3'
-
-    forall(
-      array(
-        tuple(
-          one_of(
-            constant(:req), constant(:opt), constant(:rest), constant(:keyreq), constant(:key), constant(:keyrest)
-          ),
-          simple_symbol.map do |sym|
-            "param_#{sym}".to_sym
-          end
-        )
-      )
-    ) do |parameters|
-      # params now have proper names (no :"", no Ruby keywords) due to the .map in the generator above
-      unique_names = parameters.uniq { |v| v[1] }
-      single_args_and_kwargs = unique_names.uniq do |v|
-        if [:rest, :keyrest].include?(v[0])
-          v[0]
-        else
-          v[1]
-        end
+        expect(MemoizedPropertyClass.instance_variable_get(:@new_parameters))
+          .to eq(MemoizedPropertyClass.instance_variable_get(:@old_parameters))
       end
+    end
 
-      mp = Memoized::Parameters.new(single_args_and_kwargs)
+    it "does not change the method's value" do
+      pending("prop_check fails to load for Ruby 2.5.3") if RUBY_VERSION == '2.5.3'
 
-      eval(<<-RUBY)
+      forall(
+        array(
+          tuple(
+            one_of(
+              constant(:req), constant(:opt), constant(:rest), constant(:keyreq), constant(:key), constant(:keyrest)
+            ),
+            simple_symbol.map do |sym|
+              "param_#{sym}".to_sym
+            end
+          )
+        )
+      ) do |parameters|
+        # params now have proper names (no :"", no Ruby keywords) due to the .map in the generator above
+        unique_names = parameters.uniq { |v| v[1] }
+        single_args_and_kwargs = unique_names.uniq do |v|
+          if [:rest, :keyrest].include?(v[0])
+            v[0]
+          else
+            v[1]
+          end
+        end
+
+        mp = Memoized::Parameters.new(single_args_and_kwargs)
+
+        eval(<<-RUBY)
         class MemoizedPropertyClass
           include Memoized
 
@@ -146,10 +147,12 @@ describe "#memoize" do
           remove_method :_unmemoized_parameter_dummy
           remove_method :parameter_dummy
         end
-      RUBY
+        RUBY
 
-      expect(MemoizedPropertyClass.instance_variable_get(:@new_value))
-        .to eq(MemoizedPropertyClass.instance_variable_get(:@old_value))
+        expect(MemoizedPropertyClass.instance_variable_get(:@new_value))
+          .to eq(MemoizedPropertyClass.instance_variable_get(:@old_value))
+      end
     end
   end
+
 end
