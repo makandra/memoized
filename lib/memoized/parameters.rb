@@ -133,5 +133,10 @@ module Memoized
       else raise "unknown parameter type"
       end
     end
+
+    def debug_info
+      "#{@req_params.size} - #{@opt_params.size} - #{@rest_params.size} " \
+        "| #{@keyreq_params.size} - #{@key_params.size} - #{@keyrest_params.size}"
+    end
   end
 end

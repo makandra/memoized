@@ -4,6 +4,15 @@ unless RUBY_VERSION == '2.5.3'
     include PropCheck::Generators
     include Memoized
 
+    before do
+      PropCheck::Property.configure do |config|
+        # CAUTION:
+        # 100 (default) takes 8 seconds
+        # 300 takes 11 minutes
+        config.n_runs = 100
+      end
+    end
+
     it "does not change the method's arity" do
       forall(
         array(
@@ -28,6 +37,7 @@ unless RUBY_VERSION == '2.5.3'
         end
 
         mp = Memoized::Parameters.new(single_args_and_kwargs)
+        p mp.debug_info if ENV['DEBUG'] == 'true'
 
         eval(<<-RUBY)
         class MemoizedPropertyClass
@@ -76,6 +86,7 @@ unless RUBY_VERSION == '2.5.3'
         end
 
         mp = Memoized::Parameters.new(single_args_and_kwargs)
+        p mp.debug_info if ENV['DEBUG'] == 'true'
 
         eval(<<-RUBY)
         class MemoizedPropertyClass
@@ -124,6 +135,7 @@ unless RUBY_VERSION == '2.5.3'
         end
 
         mp = Memoized::Parameters.new(single_args_and_kwargs)
+        p mp.debug_info if ENV['DEBUG'] == 'true'
 
         eval(<<-RUBY)
         class MemoizedPropertyClass
