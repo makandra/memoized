@@ -37,7 +37,7 @@ unless RUBY_VERSION == '2.5.3'
         end
 
         mp = Memoized::Parameters.new(single_args_and_kwargs)
-        p mp.debug_info if ENV['DEBUG'] == 'true'
+        puts mp.debug_info if ENV['DEBUG'] == 'true'
 
         eval(<<-RUBY)
         class MemoizedPropertyClass
@@ -86,7 +86,7 @@ unless RUBY_VERSION == '2.5.3'
         end
 
         mp = Memoized::Parameters.new(single_args_and_kwargs)
-        p mp.debug_info if ENV['DEBUG'] == 'true'
+        puts mp.debug_info if ENV['DEBUG'] == 'true'
 
         eval(<<-RUBY)
         class MemoizedPropertyClass
@@ -135,7 +135,7 @@ unless RUBY_VERSION == '2.5.3'
         end
 
         mp = Memoized::Parameters.new(single_args_and_kwargs)
-        p mp.debug_info if ENV['DEBUG'] == 'true'
+        puts mp.debug_info if ENV['DEBUG'] == 'true'
 
         eval(<<-RUBY)
         class MemoizedPropertyClass
