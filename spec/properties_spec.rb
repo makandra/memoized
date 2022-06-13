@@ -5,8 +5,6 @@ unless RUBY_VERSION == '2.5.3'
     include Memoized
 
     it "does not change the method's arity" do
-      pending("prop_check fails to load for Ruby 2.5.3") if RUBY_VERSION == '2.5.3'
-
       forall(
         array(
           tuple(
@@ -55,8 +53,6 @@ unless RUBY_VERSION == '2.5.3'
     end
 
     it "does not change the method's parameters" do
-      pending("prop_check fails to load for Ruby 2.5.3") if RUBY_VERSION == '2.5.3'
-
       forall(
         array(
           tuple(
@@ -105,8 +101,6 @@ unless RUBY_VERSION == '2.5.3'
     end
 
     it "does not change the method's value" do
-      pending("prop_check fails to load for Ruby 2.5.3") if RUBY_VERSION == '2.5.3'
-
       forall(
         array(
           tuple(

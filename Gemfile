@@ -5,7 +5,9 @@ gem 'rake', '~> 10.4.2'
 gem 'rspec', '~> 3.5.0'
 gem 'timecop', '~> 0.8.0'
 gem 'gemika'
-gem 'prop_check'
+unless RUBY_VERSION == '2.5.3'
+  gem 'prop_check'
+end
 gem 'byebug'
 
 # Gem under test
