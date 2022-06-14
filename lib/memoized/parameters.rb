@@ -129,7 +129,7 @@ module Memoized
       when :key
         "#{param_name}: 11"
       when :keyrest
-        "first: 13, second: 13"
+        "**{first: 13, second: 13}"
       else raise "unknown parameter type"
       end
     end

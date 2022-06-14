@@ -3,7 +3,13 @@ class MemoizedSpecClass
   def no_params() Date.today; end
   def with_params?(ndays, an_array) Date.today + ndays + an_array.length; end
   def returning_nil!() Date.today; nil; end
-  memoize :no_params, :with_params?, :returning_nil!
+  def all_param_types(req, opt = 3, *rest, keyreq:, key: 11, **keyrest)
+    Date.today + (req * opt * rest.inject(&:*) * keyreq * key * keyrest.values.inject(&:*))
+  end
+  def only_kwargs(**keyrest)
+    Date.today + keyrest.values.inject(&:*)
+  end
+  memoize :no_params, :with_params?, :returning_nil!, :all_param_types, :only_kwargs
 end
 class Beepbop < MemoizedSpecClass; end
 
@@ -46,6 +52,40 @@ describe Memoized do
         object.returning_nil!
         allow(Date).to receive(:today).and_raise(ArgumentError)
         expect(object.returning_nil!).to be_nil
+      end
+    end
+
+    context "for a method with all param types" do
+      it "stores memoized value" do
+        Timecop.freeze(today)
+        expect(object.all_param_types(2, 3, 5, 5, keyreq: 7, key: 11, **{ first: 13, second: 13 })).to eq(today + 1951950)
+        Timecop.freeze(tomorrow)
+        expect(object.all_param_types(2, 3, 5, 5, keyreq: 7, key: 11, **{ first: 13, second: 13 })).to eq(today + 1951950)
+      end
+      it "does not confuse one set of inputs for another" do
+        Timecop.freeze(today)
+        expect(object.all_param_types(2, 3, 5, 5, keyreq: 7, key: 11, **{ first: 13, second: 13 })).to eq(today + 1951950)
+        expect(object.all_param_types(2, 9, 5, keyreq: 7, key: 121, **{ first: 13 })).to eq(today + 990990)
+        Timecop.freeze(tomorrow)
+        expect(object.all_param_types(2, 3, 5, 5, keyreq: 7, key: 11, **{ first: 13, second: 13 })).to eq(today + 1951950)
+        expect(object.all_param_types(2, 9, 5, keyreq: 7, key: 121, **{ first: 13 })).to eq(today + 990990)
+      end
+    end
+
+    context "for a method with only keyword rest arguments" do
+      it "stores memoized value" do
+        Timecop.freeze(today)
+        expect(object.only_kwargs(**{ first: 2, second: 3 })).to eq(today + 6)
+        Timecop.freeze(tomorrow)
+        expect(object.only_kwargs(**{ first: 2, second: 3 })).to eq(today + 6)
+      end
+      it "does not confuse one set of inputs for another" do
+        Timecop.freeze(today)
+        expect(object.only_kwargs(**{ first: 2, second: 3 })).to eq(today + 6)
+        expect(object.only_kwargs(**{ first: 7 })).to eq(today + 7)
+        Timecop.freeze(tomorrow)
+        expect(object.only_kwargs(**{ first: 2, second: 3 })).to eq(today + 6)
+        expect(object.only_kwargs(**{ first: 7 })).to eq(today + 7)
       end
     end
 
@@ -114,7 +154,6 @@ describe Memoized do
       it 'creates a memoized method with an arity of 0' do
         expect(Arity0.instance_method(:foo).arity).to eq(0)
       end
-
     end
 
     context 'for methods with an arity of 2' do
@@ -128,7 +167,6 @@ describe Memoized do
       it 'creates a memoized method with an arity of 2' do
         expect(Arity2.instance_method(:foo).arity).to eq(2)
       end
-
     end
 
     context 'for methods with splat args' do
@@ -142,11 +180,9 @@ describe Memoized do
       it 'creates a memoized method with an arity of -1' do
         expect(AritySplat.instance_method(:foo).arity).to eq(-1)
       end
-
     end
 
     context 'for methods with a required and an optional arg' do
-
       class ArityRequiredAndOptional < MemoizedSpecClass
         def foo(a, b = 'default')
           return [a, b]
@@ -163,11 +199,9 @@ describe Memoized do
         instance = ArityRequiredAndOptional.new
         expect(instance.foo('foo')).to eq ['foo', 'default']
       end
-
     end
 
     context 'for methods with a required arg and splat args' do
-
       class ArityArgAndOptional < MemoizedSpecClass
         def foo(a, *args)
           return [a, args]
@@ -184,7 +218,6 @@ describe Memoized do
         instance = ArityArgAndOptional.new
         expect(instance.foo('foo', 'bar', 'baz')).to eq ['foo', ['bar', 'baz']]
       end
-
     end
 
   end
