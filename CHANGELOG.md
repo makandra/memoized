@@ -7,11 +7,12 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ### Breaking changes
 
--
+- (The `.parameters` of a memoized method are no longer renamed to `arg1` ... `argn` and instead retain their original names)
 
 ### Compatible changes
 
--
+- Methods with keyword arguments can now be properly memoized
+- In addition to a methods `.arity`, memoized now also preserves its `.parameters` 
 
 ## 1.1.0 - 2022-03-16
 

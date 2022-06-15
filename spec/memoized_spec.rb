@@ -220,6 +220,54 @@ describe Memoized do
       end
     end
 
+    context 'for methods with all types of args' do
+      class AllArgTypes < MemoizedSpecClass
+        def foo(required, optional = 3, *rest, req_keyword:, opt_keyword: 11, **keyrest)
+          return [required, optional, rest, req_keyword, opt_keyword, keyrest]
+        end
+
+        memoize :foo
+      end
+
+      it 'the memoized method has the same arity as the original method' do
+        expect(AllArgTypes.instance_method(:_unmemoized_foo).arity).to eq(-3)
+        expect(AllArgTypes.instance_method(:foo).arity).to eq(-3)
+      end
+
+      it 'the memoized method has the same parameters as the original method' do
+        expect(AllArgTypes.instance_method(:_unmemoized_foo).parameters)
+          .to eq([
+            [:req, :required],
+            [:opt, :optional],
+            [:rest, :rest],
+            [:keyreq, :req_keyword],
+            [:key, :opt_keyword],
+            [:keyrest, :keyrest]
+          ])
+        expect(AllArgTypes.instance_method(:foo).parameters)
+          .to eq([
+            [:req, :required],
+            [:opt, :optional],
+            [:rest, :rest],
+            [:keyreq, :req_keyword],
+            [:key, :opt_keyword],
+            [:keyrest, :keyrest]
+          ])
+      end
+
+      it "passes all args to the original method correctly" do
+        instance = AllArgTypes.new
+        expect(instance.foo(2, 333, 5, 5, req_keyword: 7, opt_keyword: 1111, first: 13, second: 17))
+          .to eq [2, 333, [5, 5], 7, 1111, { first: 13, second: 17 }]
+      end
+
+      it "preserves the original method's default values" do
+        instance = AllArgTypes.new
+        expect(instance.foo(2, req_keyword: 7, third: 19))
+          .to eq [2, 3, [], 7, 11, { third: 19 }]
+      end
+    end
+
   end
 
 

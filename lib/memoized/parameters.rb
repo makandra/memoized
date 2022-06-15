@@ -28,12 +28,15 @@ module Memoized
           @key_params << [param_type, param_name]
         when :keyrest
           @keyrest_params << [param_type, param_name]
-        else raise "unknown parameter type"
+        when :block
+          raise Memoized::CannotMemoize, 'Cannot memoize a method that takes a block!'
+        else
+          raise Memoized::CannotMemoize, 'Unknown parameter type!'
         end
       end
 
       if @rest_params.size > 1 || @keyrest_params.size > 1
-        raise "multiple rest or keyrest parameters, invalid signature"
+        raise Memoized::CannotMemoize "Multiple rest or keyrest parameters, invalid signature!"
       end
     end
 

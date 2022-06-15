@@ -1,6 +1,8 @@
 require 'memoized/parameters'
 
 module Memoized
+  class CannotMemoize < ::StandardError; end
+
   def self.included(base)
     base.extend ClassMethods
     base.send :include, InstanceMethods
