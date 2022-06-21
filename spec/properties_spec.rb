@@ -159,6 +159,64 @@ unless RUBY_VERSION == '2.5.3'
           .to eq(MemoizedPropertyClass.instance_variable_get(:@old_value))
       end
     end
-  end
 
+    it "computes the correct value" do
+      forall(array(choose(15), min: 6, max: 6)) do |parameter_multiplicities|
+
+        params = []
+
+        parameter_multiplicities[0].times.with_index do |counter|
+          params << [:req, "required_#{counter}".to_sym]
+        end
+
+        parameter_multiplicities[1].times.with_index do |counter|
+          params << [:opt, "optional_#{counter}".to_sym]
+        end
+
+        if parameter_multiplicities[2] != 0
+          params << [:rest, :args]
+        end
+
+        parameter_multiplicities[3].times.with_index do |counter|
+          params << [:keyreq, "required_kw_#{counter}".to_sym]
+        end
+
+        parameter_multiplicities[4].times.with_index do |counter|
+          params << [:key, "optional_kw_#{counter}".to_sym]
+        end
+
+        if parameter_multiplicities[5] != 0
+          params << [:keyrest, :kwargs]
+        end
+
+        mp = Memoized::Parameters.new(params, parameter_multiplicities[2], parameter_multiplicities[5])
+
+        puts mp.debug_info if ENV['DEBUG'] == 'true'
+
+        eval(<<-RUBY)
+        class MemoizedPropertyClass
+          include Memoized
+
+          def parameter_dummy(#{mp.signature})
+            #{mp.test_body}
+          end
+
+          memoize :parameter_dummy
+          @value = new.parameter_dummy(#{mp.test_arguments})
+
+          # cleanup to get rid of warnings
+          remove_method :_unmemoized_parameter_dummy
+          remove_method :parameter_dummy
+        end
+        RUBY
+
+        expected_result = [2, 3, 5, 7, 11, 13].zip(parameter_multiplicities).map do |base, exponent|
+          base ** exponent
+        end.inject(&:*)
+
+        expect(MemoizedPropertyClass.instance_variable_get(:@value))
+          .to eq(expected_result)
+      end
+    end
+  end
 end

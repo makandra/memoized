@@ -13,6 +13,8 @@ end
 
 module Memoized
   class Parameters
+    attr_accessor :args_count, :kwargs_count
+
     def test_body
       params.map(&Parameters.method(:to_test_body)).join(" * ")
     end
@@ -36,30 +38,41 @@ module Memoized
     end
 
     def test_arguments
-      params.map(&Parameters.method(:to_test_arguments)).join(", ")
+      params.map(&Parameters.new([], @args_count, @kwargs_count).method(:to_test_arguments)).join(", ")
     end
 
-    def self.to_test_arguments((param_type, param_name))
+    def to_test_arguments((param_type, param_name))
       case param_type
       when :req
         "2"
       when :opt
         "3"
       when :rest
-        "5, 5, 5"
+        if @args_count.nil?
+          "5, 5, 5"
+        else
+          (["5"] * @args_count).join(', ')
+        end
       when :keyreq
         "#{param_name}: 7"
       when :key
         "#{param_name}: 11"
       when :keyrest
-        "**{first: 13, second: 13}"
+        if @kwargs_count.nil?
+          "**{ first: 13, second: 13 }"
+        else
+          kwargs_list = (1..@kwargs_count).map.with_index do |counter|
+            "kwarg_#{counter}: 13"
+          end
+          "**{ #{kwargs_list.join(', ')} }"
+        end
       else raise "unknown parameter type"
       end
     end
 
     def debug_info
-      "#{@req_params.size} - #{@opt_params.size} - #{@rest_params.size} " \
-        "| #{@keyreq_params.size} - #{@key_params.size} - #{@keyrest_params.size}"
+      "#{@req_params.size} - #{@opt_params.size} - #{@args_count || @rest_params.size} " \
+        "| #{@keyreq_params.size} - #{@key_params.size} - #{@kwargs_count || @keyrest_params.size}"
     end
   end
 end

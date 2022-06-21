@@ -4,7 +4,7 @@ module Memoized
 
     attr_accessor :req_params, :opt_params, :rest_params, :keyreq_params, :key_params, :keyrest_params
 
-    def initialize(parameters = [])
+    def initialize(parameters = [], args_count = nil, kwargs_count = nil)
       # This constructor does not check, whether the parameters were ordered correctly
       # with respect to the Ruby language specification. However, all outputs will be sorted correctly.
       @req_params = []
@@ -38,6 +38,10 @@ module Memoized
       if @rest_params.size > 1 || @keyrest_params.size > 1
         raise Memoized::CannotMemoize "Multiple rest or keyrest parameters, invalid signature!"
       end
+
+      # for testing
+      @args_count = args_count
+      @kwargs_count = kwargs_count
     end
 
     def params
