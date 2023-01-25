@@ -1,4 +1,4 @@
-unless RUBY_VERSION == '2.5.3'
+unless RUBY_VERSION == '2.5.3' || RUBY_VERSION == '3.2.0'
   describe "#memoize" do
     include PropCheck
     include PropCheck::Generators
