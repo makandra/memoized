@@ -22,9 +22,9 @@ Gem::Specification.new do |s|
 
   s.license = 'MIT'
 
-  s.add_development_dependency('rake', '~> 10.4.2')
-  s.add_development_dependency('rspec', '~> 3.5.0')
+  s.add_development_dependency('rake', '~> 13.0.6')
+  s.add_development_dependency('rspec', '~> 3.12.0')
   s.add_development_dependency('timecop', '~> 0.8.0')
-  s.add_development_dependency('prop_check', '~> 0.14.1')
+  s.add_development_dependency('prop_check', '~> 0.18.1')
   s.add_development_dependency('gemika')
 end
