@@ -32,7 +32,7 @@ jobs:
         ruby-version: "${{ matrix.ruby }}"
     - name: Bundle
       run: |
-        gem install bundler:2.2.21
+        gem install bundler:2.3.1
         bundle install --no-deployment
     - name: Run tests
       run: bundle exec rspec
