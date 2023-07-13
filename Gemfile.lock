@@ -8,7 +8,7 @@ GEM
   specs:
     amazing_print (1.4.0)
     diff-lcs (1.5.0)
-    gemika (0.7.1)
+    gemika (0.8.2)
     prop_check (0.18.1)
       amazing_print (~> 1.2)
     rake (13.0.6)
