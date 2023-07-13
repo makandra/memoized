@@ -120,20 +120,31 @@ calculate value ...
 
 ## Development
 
-There are tests in `spec`. We only accept PRs with tests. To run tests:
+Development
+-----------
 
-- Install Ruby 2.6.1
-- Install development dependencies using `bundle install`
-- Run tests using `bundle exec rake current_rspec`
+I'm very eager to keep this gem leightweight and on topic. If you're unsure whether a change would make
+it into the gem, [talk to me beforehand](mailto:henning.koch@makandra.de).
 
-We recommend to test large changes against multiple versions of Ruby. Supported combinations are configured in `.github/workflows/test.yml`. We provide some rake tasks to help with this:
+There are tests in `spec`. We only accept PRs with tests. If you create a PR, the tests will automatically run on
+GitHub actions on each push. We will only merge pull requests after a green GitHub actions run.
 
-- Install development dependencies using `bundle exec rake matrix:install`
-- Run tests using `bundle exec rake matrix:spec`
+To run tests locally for development you have multiple options:
 
-Note that we have configured GitHub Actions to automatically run tests in all supported Ruby versions and dependency sets after each push. We will only merge pull requests after a green GitHub Actions run.
+1. Run tests against a specific Ruby version:
+   - Install and switch to the Ruby version
+   - Install development dependencies using `bundle install`
+   - Run tests using `bundle exec rspec`
 
-I'm very eager to keep this gem leightweight and on topic. If you're unsure whether a change would make it into the gem, [talk to me beforehand](mailto:henning.koch@makandra.de).
+2. Run tests against all Ruby versions:
+   - Install all Ruby versions mentioned in `.github/workflows/test.yml`
+   - run `bin/matrix` (only supports `rbenv` for switching Ruby versions currently)
+
+Hints:
+- At the time of writing this, we only have a single Gemfile. If that isn't the case any longer,
+  check the gemika README for more detailed development instructions.
+- We recommend to have sufficiently new versions of bundler (> 2.3.0) and rubygems (> 3.3.0) installed for each Ruby version.
+- The script `bin/matrix` will warn you, if that is not the case. For all other methods you need to ensure that yourself.
 
 ## License
 
