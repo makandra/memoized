@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ### Compatible changes
 
+- Add Ruby 3.4 support
 - Provide dev script `bin/matrix` and adjust REAMDE
 - Move development dependencies out of the gemspec
 
