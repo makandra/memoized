@@ -1,9 +1,7 @@
 require 'date'
 require 'timecop'
 require 'memoized'
-if Gem::Version.new(RUBY_VERSION) > Gem::Version.new('2.5.3')
-  require 'prop_check'
-end
+require 'prop_check'
 
 RSpec.configure do |config|
   config.warnings = true
