@@ -138,13 +138,13 @@ To run tests locally for development you have multiple options:
 
 2. Run tests against all Ruby versions:
    - Install all Ruby versions mentioned in `.github/workflows/test.yml`
-   - run `bin/matrix` (only supports `rbenv` for switching Ruby versions currently)
+   - run `dev/matrix` (only supports `rbenv` for switching Ruby versions currently)
 
 Hints:
 - At the time of writing this, we only have a single Gemfile. If that isn't the case any longer,
-  check the gemika README for more detailed development instructions.
+  check the [gemika](github.com/makandra/gemika) README for more detailed development instructions.
 - We recommend to have sufficiently new versions of bundler (> 2.3.0) and rubygems (> 3.3.0) installed for each Ruby version.
-- The script `bin/matrix` will warn you, if that is not the case. For all other methods you need to ensure that yourself.
+- The script `dev/matrix` will warn you, if that is not the case. For all other methods you need to ensure that yourself.
 
 ## License
 
