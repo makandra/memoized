@@ -8,6 +8,7 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/makandra/memoized"
   s.summary     = "Memoized caches the results of your method calls"
   s.description = s.summary
+  s.license = 'MIT'
   s.metadata    = {
     'source_code_uri' => s.homepage,
     'bug_tracker_uri' => 'https://github.com/makandra/memoized/issues',
@@ -15,12 +16,11 @@ Gem::Specification.new do |s|
     'rubygems_mfa_required' => 'true',
   }
 
-  s.required_ruby_version = '>= 3.0.0'
-
-  s.files         = `git ls-files`.split("\n").reject { |path| File.lstat(path).symlink? }
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").reject { |path| File.lstat(path).symlink? }
-  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  s.files         = `git ls-files`.split("\n").select { |f| !File.symlink?(f) && !f.match(%r{^(spec|dev|media|.github)/}) }
   s.require_paths = ["lib"]
 
-  s.license = 'MIT'
+  s.bindir = 'exe'
+  s.executables = []
+
+  s.required_ruby_version = '>= 3.0.0'
 end
