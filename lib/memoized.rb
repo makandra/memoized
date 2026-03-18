@@ -26,19 +26,21 @@ module Memoized
 
         parameters = Parameters.new(instance_method(unmemoized_method).parameters)
 
+        block_forward = parameters.has_block? ? ", &#{parameters.block_param}" : ''
+
         module_eval(<<-RUBY)
           def #{method_name}(#{parameters.signature})
             #{parameters.cache_key}
 
             #{memoized_ivar_name} ||= {}
-            
+
             if #{memoized_ivar_name}.key?(cache_key)
               #{memoized_ivar_name}[cache_key]
             else
               live_result = if all_kwargs.empty?
-                #{unmemoized_method}(*all_args)
-              else  
-                #{unmemoized_method}(*all_args, **all_kwargs)
+                #{unmemoized_method}(*all_args#{block_forward})
+              else
+                #{unmemoized_method}(*all_args, **all_kwargs#{block_forward})
               end
               #{memoized_ivar_name}[cache_key] = live_result
               live_result

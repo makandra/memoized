@@ -270,6 +270,173 @@ describe Memoized do
 
   end
 
+  describe '.memoize with block parameters' do
+    class BlockNoArgs
+      include Memoized
+      def transform(&block)
+        block.call("hello")
+      end
+      memoize :transform
+    end
+
+    class BlockWithArgs
+      include Memoized
+      def transform(value, &block)
+        block.call(value)
+      end
+      memoize :transform
+    end
+
+    class BlockWithOptional
+      include Memoized
+      def transform(&block)
+        block ? block.call("hello") : "hello"
+      end
+      memoize :transform
+    end
+
+    class BlockWithKwargs
+      include Memoized
+      def transform(prefix:, suffix: "", &block)
+        result = block.call("hello")
+        "#{prefix}#{result}#{suffix}"
+      end
+      memoize :transform
+    end
+
+    class BlockWithAllParamTypes
+      include Memoized
+      def transform(req, opt = ".", *rest, key:, optkey: "", **keyrest, &block)
+        base = block.call(req)
+        "#{base}#{opt}#{rest.join}#{key}#{optkey}#{keyrest.values.join}"
+      end
+      memoize :transform
+    end
+
+    class BlockPrivate
+      include Memoized
+      def public_transform
+        transform(&:upcase)
+      end
+      private
+      def transform(&block)
+        block.call("hello")
+      end
+      memoize :transform
+    end
+
+    context "for a method with only a block parameter" do
+      let(:object) { BlockNoArgs.new }
+
+      it "forwards the block and caches the result" do
+        result = object.transform(&:upcase)
+        expect(result).to eq("HELLO")
+      end
+
+      it "returns the cached result on subsequent calls" do
+        result1 = object.transform(&:upcase)
+        result2 = object.transform(&:reverse)
+        expect(result1).to eq("HELLO")
+        expect(result2).to eq("HELLO")
+      end
+
+      it "can be unmemoized" do
+        object.transform(&:upcase)
+        object.unmemoize(:transform)
+        result = object.transform(&:reverse)
+        expect(result).to eq("olleh")
+      end
+    end
+
+    context "for a method with an optional block" do
+      let(:object) { BlockWithOptional.new }
+
+      it "works when called with a block" do
+        expect(object.transform(&:upcase)).to eq("HELLO")
+      end
+
+      it "works when called without a block" do
+        expect(object.transform).to eq("hello")
+      end
+
+      it "returns cached result when called without a block after being cached with one" do
+        object.transform(&:upcase)
+        expect(object.transform).to eq("HELLO")
+      end
+
+      it "returns cached result when called with a block after being cached without one" do
+        object.transform
+        expect(object.transform(&:upcase)).to eq("hello")
+      end
+    end
+
+    context "for a method with positional args and a block" do
+      let(:object) { BlockWithArgs.new }
+
+      it "forwards both args and block" do
+        result = object.transform("world", &:upcase)
+        expect(result).to eq("WORLD")
+      end
+
+      it "caches per argument, ignoring the block" do
+        result1 = object.transform("world", &:upcase)
+        result2 = object.transform("world", &:reverse)
+        result3 = object.transform("other", &:upcase)
+        expect(result1).to eq("WORLD")
+        expect(result2).to eq("WORLD")
+        expect(result3).to eq("OTHER")
+      end
+    end
+
+    context "for a method with keyword args and a block" do
+      let(:object) { BlockWithKwargs.new }
+
+      it "forwards kwargs and block" do
+        expect(object.transform(prefix: "[", suffix: "]", &:upcase)).to eq("[HELLO]")
+      end
+
+      it "caches per kwargs, ignoring the block" do
+        result1 = object.transform(prefix: "[", &:upcase)
+        result2 = object.transform(prefix: "[", &:reverse)
+        result3 = object.transform(prefix: "(", &:upcase)
+        expect(result1).to eq("[HELLO")
+        expect(result2).to eq("[HELLO")
+        expect(result3).to eq("(HELLO")
+      end
+    end
+
+    context "for a method with all param types and a block" do
+      let(:object) { BlockWithAllParamTypes.new }
+
+      it "forwards everything and caches correctly" do
+        result = object.transform("hi", "!", "a", "b", key: "k", optkey: "o", extra: "e", &:upcase)
+        expect(result).to eq("HI!abkoe")
+      end
+
+      it "caches per args, ignoring the block" do
+        result1 = object.transform("hi", key: "k", &:upcase)
+        result2 = object.transform("hi", key: "k", &:reverse)
+        expect(result1).to eq("HI.k")
+        expect(result2).to eq("HI.k")
+      end
+    end
+
+    context "for a private method with a block" do
+      let(:object) { BlockPrivate.new }
+
+      it "respects method visibility" do
+        expect(BlockPrivate.private_method_defined?(:transform)).to be_truthy
+        expect(BlockPrivate.private_method_defined?(:_unmemoized_transform)).to be_truthy
+      end
+
+      it "memoizes the private method" do
+        result1 = object.public_transform
+        result2 = object.public_transform
+        expect(result1).to eq("HELLO")
+        expect(result2).to eq("HELLO")
+      end
+    end
+  end
 
   describe 'instance methods' do
     class MemoizedSpecClass

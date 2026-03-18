@@ -2,7 +2,7 @@ module Memoized
   class Parameters
     UNIQUE = 42.freeze
 
-    attr_accessor :req_params, :opt_params, :rest_params, :keyreq_params, :key_params, :keyrest_params
+    attr_accessor :req_params, :opt_params, :rest_params, :keyreq_params, :key_params, :keyrest_params, :block_param
 
     def initialize(parameters = [])
       # This constructor does not check, whether the parameters were ordered correctly
@@ -13,6 +13,7 @@ module Memoized
       @keyreq_params = []
       @key_params = []
       @keyrest_params = []
+      @block_param = nil
 
       parameters.each do |(param_type, param_name)|
         case param_type
@@ -29,7 +30,7 @@ module Memoized
         when :keyrest
           @keyrest_params << [param_type, param_name]
         when :block
-          raise Memoized::CannotMemoize, 'Cannot memoize a method that takes a block!'
+          @block_param = param_name
         else
           raise Memoized::CannotMemoize, 'Unknown parameter type!'
         end
@@ -44,8 +45,16 @@ module Memoized
       @req_params + @opt_params + @rest_params + @keyreq_params + @key_params + @keyrest_params
     end
 
+    def has_block?
+      !@block_param.nil?
+    end
+
     def signature
-      params.map(&Parameters.method(:to_signature)).join(', ')
+      sig = params.map(&Parameters.method(:to_signature)).join(', ')
+      return sig unless has_block?
+
+      block_sig = "&#{@block_param}"
+      sig.empty? ? block_sig : "#{sig}, #{block_sig}"
     end
 
     def self.to_signature((param_type, param_name))
